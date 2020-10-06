@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 import { Button, Form, Input, Row, Col, message } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
-import Navbar from "components/Navbar";
 import { useClipboard } from "use-clipboard-copy";
 import { useEffect, useState } from "react";
-import { resolve } from "path";
+import Lottie from "react-lottie";
+import animationData from "./animation.json";
 
 const StyledInput = styled(Input)`
   border-radius: 0;
@@ -15,6 +15,7 @@ const PageContainer = styled.div`
   background: #232931;
   min-height: 100vh;
   font-family: "Montserrat", sans-serif;
+  padding-top: 3rem;
 `;
 const PageTitle = styled.h1`
   font-size: 48px;
@@ -46,6 +47,12 @@ const ShortenerPage = () => {
   const [resultURL, setResultURL] = useState("");
   const clipboard = useClipboard();
 
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+  };
+
   const shortenURL = async () => {
     const originalURL = form.getFieldValue("url");
     console.log(originalURL);
@@ -67,33 +74,44 @@ const ShortenerPage = () => {
 
   return (
     <PageContainer>
-      <Navbar />
-      <PageContent>
-        <Form onFinish={shortenURL} form={form}>
-          <PageTitle>Shorten your URL</PageTitle>
-          <Row>
-            <Col md={{ span: 8 }} xs={{ span: 24 }}>
-              <Form.Item name="url">
-                <StyledInput placeholder="Please input your url" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Button onClick={shortenURL}>Shorten my URL</Button>
-        </Form>
-        <PageSubtitle>Result: </PageSubtitle>
-        <Row>
-          <ResultTextContainer md={{ span: 8 }} xs={{ span: 24 }}>
-            <Row justify="space-between">
-              <Col>
-                <a href={resultURL}>{resultURL}</a>
-              </Col>
-              <Col>
-                <CopyOutlined onClick={copyResultURL} />
-              </Col>
+      <Row>
+        <Col md={{ span: 12 }} xs={{ span: 24 }}>
+          <PageContent>
+            <Form onFinish={shortenURL} form={form}>
+              <PageTitle>Shorten your URL</PageTitle>
+              <Row>
+                <Col md={{ span: 16 }} xs={{ span: 24 }}>
+                  <Form.Item name="url">
+                    <StyledInput placeholder="Please input your url" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Button onClick={shortenURL}>Shorten my URL</Button>
+            </Form>
+            <PageSubtitle>Result: </PageSubtitle>
+            <Row>
+              <ResultTextContainer md={{ span: 16 }} xs={{ span: 24 }}>
+                <Row justify="space-between">
+                  <Col>
+                    <a href={resultURL}>{resultURL}</a>
+                  </Col>
+                  <Col>
+                    <CopyOutlined onClick={copyResultURL} />
+                  </Col>
+                </Row>
+              </ResultTextContainer>
             </Row>
-          </ResultTextContainer>
-        </Row>
-      </PageContent>
+          </PageContent>
+        </Col>
+        <Col md={{ span: 12 }} xs={{ span: 0 }}>
+          <Lottie
+            options={defaultOptions}
+            height={400}
+            width={400}
+            style={{ marginTop: "2rem" }}
+          />
+        </Col>
+      </Row>
     </PageContainer>
   );
 };
