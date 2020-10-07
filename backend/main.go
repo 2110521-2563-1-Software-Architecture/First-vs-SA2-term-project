@@ -8,7 +8,7 @@ import (
 )
 
 type RequestBody struct {
-	URL string `json:"url"`
+	URL string
 }
 
 func shortenURL(c *gin.Context) {
