@@ -5,6 +5,7 @@ import { useClipboard } from 'use-clipboard-copy'
 import { useEffect, useState } from 'react'
 import Lottie from 'react-lottie'
 import animationData from './animation.json'
+import { getShortenURL, redirectTo } from 'utils/api'
 
 const StyledInput = styled(Input)`
   border-radius: 0;
@@ -58,12 +59,17 @@ const ShortenerPage = () => {
     console.log(originalURL)
 
     // TODO: call api
-    setResultURL('https://matcher.com/asdmgWa')
+    const { url } = await getShortenURL(originalURL)
+    setResultURL(url)
   }
 
   const copyResultURL = () => {
     clipboard.copy(resultURL)
     message.success({ content: 'Copied to clipboard', duration: 1 })
+  }
+
+  const redirect = async () => {
+    const res = await redirectTo(resultURL)
   }
 
   useEffect(() => {
@@ -93,7 +99,7 @@ const ShortenerPage = () => {
               <ResultTextContainer md={{ span: 16 }} xs={{ span: 24 }}>
                 <Row justify="space-between">
                   <Col>
-                    <a href={resultURL}>{resultURL}</a>
+                    <span onClick={redirect}>{resultURL}</span>
                   </Col>
                   <Col>
                     <CopyOutlined onClick={copyResultURL} />
