@@ -3,6 +3,7 @@ package repositories
 type KeyRepository interface {
 	GetUnusedKey() (string, error)
 	InsertKey(key string) (string, error)
+	Exists(key string) (bool, error)
 }
 
 type MemoryKeyRepository struct {
@@ -25,7 +26,17 @@ func (repo *MemoryKeyRepository) GetUnusedKey() (string, error) {
 }
 
 func (repo *MemoryKeyRepository) InsertKey(key string) (string, error) {
-	repo.unusedKeys = append(repo.unusedKeys, key)
-	repo.keys[key] = false
+	exists, _ := repo.Exists(key)
+	if (!exists) {
+		repo.unusedKeys = append(repo.unusedKeys, key)
+		repo.keys[key] = false
+	}
 	return key, nil
+}
+
+func (repo *MemoryKeyRepository) Exists(key string) (bool, error) {
+	if _, ok := repo.keys[key]; ok {
+		return true, nil
+	}
+	return false, nil
 }
