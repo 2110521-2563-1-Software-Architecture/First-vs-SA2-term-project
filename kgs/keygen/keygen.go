@@ -1,14 +1,15 @@
 package keygen
 
 import (
-	"fmt"
-	"time"
+	// "fmt"
+	// "time"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/repositories"
+	"strconv"
 )
 
-func GenerateKeys() {
+func GenerateKeys(repo repositories.KeyRepository) {
 	// TODO: Generate unique keys and insert into the database.
 	for i := 0; i < 100; i++ {
-		time.Sleep(1000 * time.Millisecond)
-		fmt.Println("Key")
-	}
+		repo.InsertKey(strconv.Itoa(i))
+	}	
 }
