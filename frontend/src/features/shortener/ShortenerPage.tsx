@@ -14,7 +14,6 @@ const StyledInput = styled(Input)`
 `
 const PageContainer = styled.div`
   background: #232931;
-  min-height: 100vh;
   font-family: 'Montserrat', sans-serif;
   padding-top: 3rem;
 `
@@ -110,14 +109,20 @@ const ShortenerPage = () => {
           </PageContent>
         </Col>
         <Col md={{ span: 12 }} xs={{ span: 0 }}>
-          <Lottie
+          {/* <Lottie
             options={defaultOptions}
             height={400}
             width={400}
             style={{ marginTop: '2rem' }}
-          />
+          /> */}
         </Col>
       </Row>
+
+      <PageContent>
+        <br />
+        <br />
+        <PageTitle>Shorten Traffic History</PageTitle>
+      </PageContent>
     </PageContainer>
   )
 }
