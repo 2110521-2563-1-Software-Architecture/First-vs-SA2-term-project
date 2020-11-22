@@ -10,6 +10,7 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.POST("/shorten", handlers.ShortenURL)
+	router.POST("/shortenHistory", handlers.ShortenHistory)
 	router.GET("/:hash", handlers.Redirect)
 	router.Run(":8080")
 }

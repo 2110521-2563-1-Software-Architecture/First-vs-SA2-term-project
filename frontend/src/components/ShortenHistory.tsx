@@ -1,7 +1,9 @@
 import { Row, Col, Timeline, message } from 'antd'
 import { useClipboard } from 'use-clipboard-copy'
 import { CopyOutlined } from '@ant-design/icons'
+import { getShortenHistory } from 'utils/api'
 import styled from '@emotion/styled'
+import { useEffect } from 'react'
 
 const PageContainer = styled.div`
   background: #232931;
@@ -78,6 +80,10 @@ const History = () => {
 }
 
 export const ShortenHistory = () => {
+  useEffect(() => {
+    getShortenHistory()
+  }, [])
+
   return (
     <PageContainer>
       <History />
