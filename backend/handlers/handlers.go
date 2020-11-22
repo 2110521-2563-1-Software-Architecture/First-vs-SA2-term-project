@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type ShortenURLPayload struct {
@@ -33,11 +34,24 @@ func ShortenURL(c *gin.Context) {
 }
 
 func Redirect(c *gin.Context) {
+	redis := c.MustGet("redis").(*redis.Client)
+	hash := c.Param("hash")
+
 	// TODO insert ip record into the database
-	visitRecord := VisitRecord{hash: c.Param("hash"), ip: c.ClientIP(), timestamp: time.Now().String()}
+	visitRecord := VisitRecord{hash: hash, ip: c.ClientIP(), timestamp: time.Now().String()}
 	fmt.Println(visitRecord)
-	// TODO read from database and redirect
-	location := "https://google.co.th"
+
+	// Read from cache first
+	location, err := redis.Get(redis.Context(), hash).Result()
+	if err != nil {
+		fmt.Println("Cache not found")
+		// Cache not found, query in db instead.
+		location = "https://google.co.th"
+		redis.Set(redis.Context(), hash, location, 0).Result()
+	} else {
+		fmt.Println("Cache found")
+	}
+
 	c.Redirect(301, location)
 }
 
