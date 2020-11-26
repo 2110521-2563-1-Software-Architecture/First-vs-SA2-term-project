@@ -9,8 +9,8 @@ import (
 )
 
 type Key struct {
-	Value string `bson"value"`
-	IsUsed bool `bson:"isUsed"`
+	Value string 
+	IsUsed bool 
 }
 type KeyRepository interface {
 	GetUnusedKey() (string, error)
@@ -44,25 +44,12 @@ func NewMemoryKeyRepository() *MemoryKeyRepository {
 }
 
 func (repo *MemoryKeyRepository) GetUnusedKey() (string, error) {
-	cur, err := repo.Collection.Find(context.Background(), bson.M{"isUsed": false})
+	var key Key
+	err := repo.Collection.FindOne(context.Background(), bson.M{"isUsed": false}).Decode(&key)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer cur.Close(context.Background())
-	for cur.Next(context.Background()) {
-		var k Key
-		err = cur.Decode(&k)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(k)
-	}
-
-	// fmt.Println(k)
-	if err != nil {
-		return "", err
-	}
-	return "www", nil
+	return key.Value, nil
 }
 
 func (repo *MemoryKeyRepository) InsertKey(key string) (string, error) {
