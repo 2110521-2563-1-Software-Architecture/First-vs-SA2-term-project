@@ -5,11 +5,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
 )
 
 func RedisClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: utils.Getenv("REDIS_HOST") + ":" + utils.Getenv("REDIS_PORT"),
 	})
 	
 	return client
