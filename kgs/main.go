@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	repo := repositories.NewMemoryKeyRepository()	
+	repo := repositories.NewMongoKeyRepository()	
 	go func() {
 		keygen.GenerateKeys(repo)
 	}()

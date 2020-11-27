@@ -19,13 +19,13 @@ type KeyRepository interface {
 	Exists(key string) (bool, error)
 }
 
-type MemoryKeyRepository struct {
+type MongoKeyRepository struct {
 	// keys map[string]bool
 	// unusedKeys []string
 	*mongo.Collection
 }
 
-func NewMemoryKeyRepository() *MemoryKeyRepository {
+func NewMongoKeyRepository() *MongoKeyRepository {
 	uri := utils.Getenv("MONGO_URI")
 	databaseName := utils.Getenv("DB_NAME")
 
@@ -38,12 +38,12 @@ func NewMemoryKeyRepository() *MemoryKeyRepository {
 
 	fmt.Println("Mongo connection is successful")
 
-	repo := &MemoryKeyRepository{db.Collection("key")}
+	repo := &MongoKeyRepository{db.Collection("key")}
 
 	return repo
 }
 
-func (repo *MemoryKeyRepository) GetUnusedKey() (string, error) {
+func (repo *MongoKeyRepository) GetUnusedKey() (string, error) {
 	var key Key
 	err := repo.Collection.FindOne(context.Background(), bson.M{"isUsed": false}).Decode(&key)
 	if err != nil {
@@ -52,7 +52,7 @@ func (repo *MemoryKeyRepository) GetUnusedKey() (string, error) {
 	return key.Value, nil
 }
 
-func (repo *MemoryKeyRepository) InsertKey(key string) (string, error) {
+func (repo *MongoKeyRepository) InsertKey(key string) (string, error) {
 	exists, _ := repo.Exists(key)
 	if (!exists) {
 		_, err := repo.Collection.InsertOne(context.Background(), bson.M{"value": key, "isUsed": false})
@@ -65,7 +65,7 @@ func (repo *MemoryKeyRepository) InsertKey(key string) (string, error) {
 	return "", nil
 }
 
-func (repo *MemoryKeyRepository) Exists(key string) (bool, error) {
+func (repo *MongoKeyRepository) Exists(key string) (bool, error) {
 	result := repo.Collection.FindOne(context.Background(), bson.M{"value": key})
 	var k Key
 	err := result.Decode(&k)
@@ -76,7 +76,7 @@ func (repo *MemoryKeyRepository) Exists(key string) (bool, error) {
 	return true, err
 }
 
-func (repo *MemoryKeyRepository) FindAll() (error) {
+func (repo *MongoKeyRepository) FindAll() (error) {
 	cur, err := repo.Collection.Find(context.Background(), bson.D{})
 	// var k Key
 	defer cur.Close(context.Background())
