@@ -100,20 +100,6 @@ func Redirect(c *gin.Context) {
 
 func ShortenHistory(c *gin.Context) {
 	//TODO assign value from DB & cast go struct to JSON!!!!
-
-	// var history = []VisitRecord{
-	// 	VisitRecord{
-	// 		Ip:        "1.2.3",
-	// 		Hash:      "goo.gl/1234",
-	// 		Timestamp: "12354394584",
-	// 	},
-	// 	VisitRecord{
-	// 		Ip:        "1.2.3",
-	// 		Hash:      "goo.gl/1234",
-	// 		Timestamp: "12354394584",
-	// 	},
-	// }
-
 	var history [5]VisitRecord
 	history[0] = VisitRecord{
 		Ip:        "1.2.3",
