@@ -5,9 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"errors"
+	"json"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/vicanso/go-axios"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/repositories"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
 )
 
 type ShortenURLPayload struct {
@@ -20,18 +25,48 @@ type VisitRecord struct {
 	Timestamp string
 }
 
+type URLMap struct {
+	Key string
+	Url string
+}
+
+func GetUnusedKey() (string, error) {
+	keygen_endpoint := fmt.Sprintf("http://%s:%s", utils.Getenv("KEYGEN_HOST"), utils.Getenv("KEYGEN_PORT"))
+	resp, err := axios.Get(keygen_endpoint)
+	if err != nil {
+		return "", errors.New("Error while retrieving new key")
+	}
+	// var url_map URLMap
+	// url_map = json
+	return string(resp.Data), nil
+}
+
 func ShortenURL(c *gin.Context) {
+	repo := c.MustGet("repo").(repositories.URLRepository)
+
 	var body ShortenURLPayload
 	err := c.BindJSON(&body)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(body)
-	c.JSON(http.StatusOK, gin.H{"url": body.URL})
+
+	hash, err := GetUnusedKey()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	_, err = repo.Create(hash, body.URL)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"url": body.URL, "key": hash})
+	}
 }
 
 func Redirect(c *gin.Context) {
 	redis := c.MustGet("redis").(*redis.Client)
+	repo := c.MustGet("repo").(repositories.URLRepository)
+
 	hash := c.Param("hash")
 
 	// TODO insert ip record into the database
@@ -43,13 +78,18 @@ func Redirect(c *gin.Context) {
 	if err != nil {
 		fmt.Println("Cache not found")
 		// Cache not found, query in db instead.
-		location = "https://google.co.th"
-		redis.Set(redis.Context(), hash, location, 0).Result()
+		location, err = repo.GetURL(hash)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			redis.Set(redis.Context(), hash, location, 0).Result()
+			c.Redirect(301, location)
+		}
 	} else {
 		fmt.Println("Cache found")
+		c.Redirect(301, location)
 	}
-
-	c.Redirect(301, location)
+	fmt.Println(location)
 }
 
 func ShortenHistory(c *gin.Context) {
