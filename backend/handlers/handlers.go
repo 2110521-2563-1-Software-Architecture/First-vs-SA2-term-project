@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -14,13 +15,9 @@ type ShortenURLPayload struct {
 }
 
 type VisitRecord struct {
-	ip        string
-	hash      string
-	timestamp string
-}
-
-type Records struct {
-	Object []VisitRecord
+	Ip        string
+	Hash      string
+	Timestamp string
 }
 
 func ShortenURL(c *gin.Context) {
@@ -38,7 +35,7 @@ func Redirect(c *gin.Context) {
 	hash := c.Param("hash")
 
 	// TODO insert ip record into the database
-	visitRecord := VisitRecord{hash: hash, ip: c.ClientIP(), timestamp: time.Now().String()}
+	visitRecord := VisitRecord{Hash: hash, Ip: c.ClientIP(), Timestamp: time.Now().String()}
 	fmt.Println(visitRecord)
 
 	// Read from cache first
@@ -57,20 +54,39 @@ func Redirect(c *gin.Context) {
 
 func ShortenHistory(c *gin.Context) {
 	//TODO assign value from DB & cast go struct to JSON!!!!
-	var history = []VisitRecord{
-		VisitRecord{
-			ip:        "1.2.3",
-			hash:      "goo.gl/1234",
-			timestamp: "12354394584",
-		},
-		VisitRecord{
-			ip:        "1.2.3",
-			hash:      "goo.gl/1234",
-			timestamp: "12354394584",
-		},
+
+	// var history = []VisitRecord{
+	// 	VisitRecord{
+	// 		Ip:        "1.2.3",
+	// 		Hash:      "goo.gl/1234",
+	// 		Timestamp: "12354394584",
+	// 	},
+	// 	VisitRecord{
+	// 		Ip:        "1.2.3",
+	// 		Hash:      "goo.gl/1234",
+	// 		Timestamp: "12354394584",
+	// 	},
+	// }
+
+	var history [5]VisitRecord
+	history[0] = VisitRecord{
+		Ip:        "1.2.3",
+		Hash:      "goo.gl/1234",
+		Timestamp: "12354394584",
+	}
+	history[1] = VisitRecord{
+		Ip:        "1.2.3",
+		Hash:      "goo.gl/1234",
+		Timestamp: "12354394584",
 	}
 
-	// fmt.Println(history)
+	recordsMarshal, err := json.Marshal(history)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	c.JSON(http.StatusOK, history)
+	fmt.Println(string(recordsMarshal))
+
+	c.JSON(http.StatusOK, string(recordsMarshal))
 }
