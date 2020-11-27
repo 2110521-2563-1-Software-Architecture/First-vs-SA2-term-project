@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"errors"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -53,11 +54,18 @@ func ShortenURL(c *gin.Context) {
 		fmt.Println(err)
 	}
 
-	_, err = repo.Create(hash, body.URL)
+	re := regexp.MustCompile(`^(?:f|ht)tps?\:\/\/.*`)
+	url := body.URL
+	if re.FindString(url) == "" {
+		url = "http://" + url
+	}
+	fmt.Println(url)
+
+	_, err = repo.Create(hash, url)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"url": body.URL, "key": hash})
+		c.JSON(http.StatusOK, gin.H{"url": url, "key": hash})
 	}
 }
 
