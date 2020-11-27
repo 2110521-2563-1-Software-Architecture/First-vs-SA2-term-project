@@ -74,7 +74,7 @@ func Redirect(c *gin.Context) {
 	if exists {
 		visitRecord := VisitRecord{Hash: "hash-" + hash, Ip: "ip-" + c.ClientIP(), Timestamp: "time-" + time.Now().String()}
 		fmt.Println(visitRecord)
-		repoHistory.CreateHistory(hash, c.ClientIP(), time.Now().String())
+		repoHistory.CreateHistory(c.ClientIP(), hash, time.Now().String())
 	}
 
 	// Read from cache first
@@ -97,26 +97,15 @@ func Redirect(c *gin.Context) {
 }
 
 func ShortenHistory(c *gin.Context) {
-	//TODO assign value from DB & cast go struct to JSON!!!!
-	var history [5]VisitRecord
-	history[0] = VisitRecord{
-		Ip:        "1.2.3",
-		Hash:      "goo.gl/1234",
-		Timestamp: "12354394584",
-	}
-	history[1] = VisitRecord{
-		Ip:        "1.2.3",
-		Hash:      "goo.gl/1234",
-		Timestamp: "12354394584",
-	}
+	repoHistory := c.MustGet("repoHistory").(repositories.HistoryRepository)
 
-	recordsMarshal, err := json.Marshal(history)
+	var body Key
+	err := c.BindJSON(&body)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 
-	fmt.Println(string(recordsMarshal))
-
-	c.JSON(http.StatusOK, string(recordsMarshal))
+	history, err := repoHistory.GetHistory(body.Key)
+	fmt.Println("ShortenHistory:", history)
+	c.JSON(http.StatusOK, string(history))
 }

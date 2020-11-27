@@ -41,19 +41,42 @@ const TimelineItem = ({ color, timestamp, isp, ipType, region }) => {
 
 const History = () => {
   const clipboard = useClipboard()
-  const resultURL = 'https://ant.design/components/timeline'
-
   const [history, setHistory] = useState(null)
+  const [ShowHistory, setShowHistory] = useState(null)
+  const [resultURL, setResultURL] = useState(null)
 
   const copyResultURL = () => {
     clipboard.copy(resultURL)
     message.success({ content: 'Copied to clipboard', duration: 1 })
   }
 
-  const onSearch = (val) => {
+  const onSearch = async (val) => {
     console.log(val)
-    setHistory(getShortenHistory(val))
+    setResultURL('localhost:8080/' + val)
+    setHistory(await getShortenHistory(val))
   }
+
+  useEffect(() => {
+    console.log(history)
+    if (history) {
+      setShowHistory(
+        history.map((record, i) => {
+          if (record['Ip'] !== '') {
+            return (
+              <TimelineItem
+                key={'TimelineItem-' + i}
+                color="green"
+                timestamp={record['Timestamp']}
+                isp=""
+                ipType={record['Ip']}
+                region="Thai"
+              />
+            )
+          }
+        }),
+      )
+    }
+  }, [history])
 
   return (
     <div style={{ marginBottom: '24px' }}>
@@ -77,23 +100,7 @@ const History = () => {
               <CopyOutlined onClick={copyResultURL} />
             </Col>
           </Row>
-          <Timeline>
-            <TimelineItem
-              color="green"
-              timestamp="2015-09-01 09:12:11"
-              isp="AIS Fibre"
-              ipType="IPv6"
-              region="Bangkok"
-            />
-            <TimelineItem
-              color="green"
-              timestamp="2015-09-01 09:12:11"
-              isp="AIS Fibre"
-              ipType="IPv6"
-              region="Bangkok"
-            />
-            <TimelineItem color="red" timestamp="" isp="" ipType="" region="" />
-          </Timeline>
+          <Timeline>{ShowHistory}</Timeline>
         </>
       ) : (
         <h2 style={{ marginBottom: '16px', color: 'rgb(130 130 130)' }}>

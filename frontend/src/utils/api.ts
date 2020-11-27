@@ -13,9 +13,9 @@ export const redirectTo = async(url: string) => {
 }
 
 export const getShortenHistory = async(searchVal) => {
-    const resp = await (await axios.post(`${API_ENDPOINT}/shortenHistory`, {searchKey: searchVal})).data
+    const resp = await (await axios.post(`${API_ENDPOINT}/shortenHistory`, {key: searchVal})).data
     let respParse = JSON.parse(resp)
 
     console.log(respParse)
-    return resp
+    return respParse
 }

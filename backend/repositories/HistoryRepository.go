@@ -2,9 +2,12 @@ package repositories
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
+	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -44,13 +47,41 @@ func NewMongoHistoryRepository() *MongoHistoryRepository {
 }
 
 func (repo *MongoHistoryRepository) GetHistory(key string) (string, error) {
-	result := repo.Collection.FindOne(context.Background(), bson.M{"key": key})
-	var records []VisitRecord
-	err := result.Decode(&records)
+	result, err := repo.Collection.Find(context.Background(), bson.M{"hash": key})
 	if err != nil {
 		return "", err
 	}
-	return string(""), err
+
+	var records [10]VisitRecord
+	var j = 0
+	defer result.Close(context.Background())
+	for result.Next(context.Background()) {
+		var record bson.M
+		if err = result.Decode(&record); err != nil {
+			log.Fatal(err)
+		}
+
+		deResult := &VisitRecord{}
+		mapstructure.Decode(record, &deResult)
+		if j < 10 {
+			records[j] = VisitRecord{
+				Ip:        deResult.Ip,
+				Hash:      deResult.Hash,
+				Timestamp: deResult.Timestamp,
+			}
+			// fmt.Println(records)
+			j++
+		}
+	}
+
+	// fmt.Println("GetHistory records:", records)
+	recordsMarshal, err := json.Marshal(records)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	// fmt.Println(string(recordsMarshal))
+	return string(recordsMarshal), err
 }
 
 func (repo *MongoHistoryRepository) CreateHistory(Ip string, Hash string, Timestamp string) (bool, error) {
