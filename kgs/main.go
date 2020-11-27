@@ -9,8 +9,7 @@ import (
 )
 
 func main() {
-	repo := repositories.NewMemoryKeyRepository()
-
+	repo := repositories.NewMemoryKeyRepository()	
 	go func() {
 		keygen.GenerateKeys(repo)
 	}()
@@ -19,6 +18,7 @@ func main() {
 	router.Use(cors.Default())
 	router.Use(Repo(repo))
 	router.GET("/", handlers.GetUnusedKey)
+	// router.GET("/test", handlers.Test)
 	router.Run(":8081")
 }
 
