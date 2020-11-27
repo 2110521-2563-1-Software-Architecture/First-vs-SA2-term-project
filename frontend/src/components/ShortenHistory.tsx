@@ -52,11 +52,8 @@ const History = () => {
 
   const onSearch = (val) => {
     console.log(val)
+    setHistory(getShortenHistory(val))
   }
-
-  useEffect(() => {
-    setHistory(getShortenHistory())
-  }, [])
 
   return (
     <div style={{ marginBottom: '24px' }}>

@@ -87,7 +87,10 @@ const ShortenerPage = () => {
               <Row>
                 <Col md={{ span: 16 }} xs={{ span: 24 }}>
                   <Form.Item name="url">
-                    <StyledInput placeholder="Please input your url" />
+                    <StyledInput
+                      size="large"
+                      placeholder="Please input your url"
+                    />
                   </Form.Item>
                 </Col>
               </Row>
