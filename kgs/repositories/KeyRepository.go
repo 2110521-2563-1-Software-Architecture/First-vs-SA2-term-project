@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
 	"fmt"
 	"log"
 )
@@ -25,9 +26,8 @@ type MemoryKeyRepository struct {
 }
 
 func NewMemoryKeyRepository() *MemoryKeyRepository {
-	// TODO: read value from env
-	uri := "mongodb+srv://matcher:z1rZvTRRJ1Sqx5r5@cluster0.fi3ay.mongodb.net/matcher?retryWrites=true&w=majority"
-	databaseName := "matcher"
+	uri := utils.Getenv("MONGO_URI")
+	databaseName := utils.Getenv("DB_NAME")
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	if err != nil {
