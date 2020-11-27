@@ -9,6 +9,5 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-redis/redis/v8 v8.4.0
-	github.com/mattn/go-shellwords v1.0.10 // indirect
-	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
+	github.com/joho/godotenv v1.3.0
 )
