@@ -48,6 +48,10 @@ func (repo *MongoKeyRepository) GetUnusedKey() (string, error) {
 	err := repo.Collection.FindOne(context.Background(), bson.M{"isUsed": false}).Decode(&key)
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		if _, err = repo.Collection.UpdateOne(context.Background(), bson.M{"value": key.Value}, bson.M{"$set": bson.M{"isUsed": true}}); err != nil {
+			log.Fatal(err)
+		}
 	}
 	return key.Value, nil
 }

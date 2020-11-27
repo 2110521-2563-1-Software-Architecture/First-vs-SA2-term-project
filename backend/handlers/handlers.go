@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 	"errors"
-	"json"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -25,9 +24,8 @@ type VisitRecord struct {
 	Timestamp string
 }
 
-type URLMap struct {
+type Key struct {
 	Key string
-	Url string
 }
 
 func GetUnusedKey() (string, error) {
@@ -36,9 +34,9 @@ func GetUnusedKey() (string, error) {
 	if err != nil {
 		return "", errors.New("Error while retrieving new key")
 	}
-	// var url_map URLMap
-	// url_map = json
-	return string(resp.Data), nil
+	var k Key
+	json.Unmarshal(resp.Data, &k)
+	return k.Key, nil
 }
 
 func ShortenURL(c *gin.Context) {
