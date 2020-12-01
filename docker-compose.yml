@@ -1,17 +1,64 @@
 version: '3.1'
 
 services:
-  frontend:
-    build: ./frontend
+  kgs-mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_DATABASE: admin
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo-js:ro
+      - ./mongo-volume:/data/db-kgs
+    networks:
+      - matcher-network
+  kgs:
+    build: ./kgs
+    networks:
+      - matcher-network
     ports:
-      - "3000:3000"
+      - "8081:8081"
+    depends_on:
+      - kgs-mongo
+    environment:
+      DB_HOST: kgs-mongo
+      DB_NAME: matcher
+      DB_PASSWORD: matcher
+      DB_USER: matcher
+      DB_PORT: 27017
+
+  backend-mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_DATABASE: admin
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo-js:ro
+      - ./mongo-volume:/data/db-backend
+    networks:
+      - matcher-network
   backend:
     build: ./backend
     ports:
       - "3001:8080"
-  kgs:
-    build: ./kgs
-    secrets:
-    - kgs_secret
+    networks:
+      - matcher-network
+    depends_on:
+    - backend-mongo
+    - kgs
+    environment:
+      KEYGEN_HOST: kgs
+      KEYGEN_PORT: 8081
+      DB_HOST: backend-mongo
+      DB_NAME: matcher
+      DB_PASSWORD: matcher
+      DB_USER: matcher
+      DB_PORT: 27017
+
+  frontend:
+    build: ./frontend
     ports:
-      - "3002:8081"
+      - "3000:3000"
+    depends_on:
+      - backend
+
+networks:
+  matcher-network:
+    driver: bridge
