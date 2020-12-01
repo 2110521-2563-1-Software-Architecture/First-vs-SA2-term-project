@@ -26,9 +26,11 @@ type MongoKeyRepository struct {
 }
 
 func NewMongoKeyRepository() *MongoKeyRepository {
-	uri := utils.Getenv("MONGO_URI")
 	databaseName := utils.Getenv("DB_NAME")
+	databaseHost := utils.Getenv("DB_HOST")
+	databasePort := utils.Getenv("DB_PORT")
 
+	uri := "mongodb://"+databaseHost + ":" + databasePort
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	if err != nil {
 		fmt.Println("Mongo connection is not successful")
