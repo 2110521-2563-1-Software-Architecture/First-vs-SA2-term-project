@@ -58,7 +58,22 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    environment:
+      NEXT_PUBLIC_API_ENDPOINT: http://localhost:3001/api
+    networks:
+      - matcher-network
+  nginx:
+    image: nginx
+    ports:
+    - "80:8000"
+    volumes:
+    - ./nginxconf/:/etc/nginx/conf.d/
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - matcher-network
 
 networks:
   matcher-network:
-    driver: bridge
+    external: true
