@@ -2,16 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
-	"errors"
 
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/repositories"
+	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/vicanso/go-axios"
-	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/repositories"
-	"github.com/2110521-2563-1-Software-Architecture/First-vs-SA2-term-project/utils"
 )
 
 type ShortenURLPayload struct {
@@ -64,12 +64,18 @@ func ShortenURL(c *gin.Context) {
 func Redirect(c *gin.Context) {
 	redis := c.MustGet("redis").(*redis.Client)
 	repo := c.MustGet("repo").(repositories.URLRepository)
+	repoHistory := c.MustGet("repoHistory").(repositories.HistoryRepository)
 
 	hash := c.Param("hash")
+	fmt.Println("hash: " + hash)
 
-	// TODO insert ip record into the database
-	visitRecord := VisitRecord{Hash: hash, Ip: c.ClientIP(), Timestamp: time.Now().String()}
-	fmt.Println(visitRecord)
+	// Insert record into the database
+	exists, _ := repo.Exists(hash)
+	if exists {
+		visitRecord := VisitRecord{Hash: "hash-" + hash, Ip: "ip-" + c.ClientIP(), Timestamp: "time-" + time.Now().String()}
+		fmt.Println(visitRecord)
+		repoHistory.CreateHistory(c.ClientIP(), hash, time.Now().String())
+	}
 
 	// Read from cache first
 	location, err := redis.Get(redis.Context(), hash).Result()
@@ -87,44 +93,19 @@ func Redirect(c *gin.Context) {
 		fmt.Println("Cache found")
 		c.Redirect(301, location)
 	}
-	fmt.Println(location)
+	fmt.Println("location: " + location)
 }
 
 func ShortenHistory(c *gin.Context) {
-	//TODO assign value from DB & cast go struct to JSON!!!!
+	repoHistory := c.MustGet("repoHistory").(repositories.HistoryRepository)
 
-	// var history = []VisitRecord{
-	// 	VisitRecord{
-	// 		Ip:        "1.2.3",
-	// 		Hash:      "goo.gl/1234",
-	// 		Timestamp: "12354394584",
-	// 	},
-	// 	VisitRecord{
-	// 		Ip:        "1.2.3",
-	// 		Hash:      "goo.gl/1234",
-	// 		Timestamp: "12354394584",
-	// 	},
-	// }
-
-	var history [5]VisitRecord
-	history[0] = VisitRecord{
-		Ip:        "1.2.3",
-		Hash:      "goo.gl/1234",
-		Timestamp: "12354394584",
-	}
-	history[1] = VisitRecord{
-		Ip:        "1.2.3",
-		Hash:      "goo.gl/1234",
-		Timestamp: "12354394584",
-	}
-
-	recordsMarshal, err := json.Marshal(history)
+	var body Key
+	err := c.BindJSON(&body)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 
-	fmt.Println(string(recordsMarshal))
-
-	c.JSON(http.StatusOK, string(recordsMarshal))
+	history, err := repoHistory.GetHistory(body.Key)
+	fmt.Println("ShortenHistory:", history)
+	c.JSON(http.StatusOK, string(history))
 }
