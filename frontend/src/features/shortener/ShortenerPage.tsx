@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Lottie from 'react-lottie'
 import animationData from './animation.json'
 import { getShortenURL, redirectTo } from 'utils/api'
+import { NEXT_PUBLIC_SERVER } from 'utils/config'
 
 const StyledInput = styled(Input)`
   border-radius: 0;
@@ -58,8 +59,8 @@ const ShortenerPage = () => {
     console.log(originalURL)
 
     // TODO: call api
-    const { url } = await getShortenURL(originalURL)
-    setResultURL(url)
+    const { key } = await getShortenURL(originalURL)
+    setResultURL(`${NEXT_PUBLIC_SERVER}/${key}`)
   }
 
   const copyResultURL = () => {
@@ -101,7 +102,7 @@ const ShortenerPage = () => {
               <ResultTextContainer md={{ span: 16 }} xs={{ span: 24 }}>
                 <Row justify="space-between">
                   <Col>
-                    <span onClick={redirect}>{resultURL}</span>
+                    <span onClick={redirect}>{`${resultURL}`}</span>
                   </Col>
                   <Col>
                     <CopyOutlined onClick={copyResultURL} />
@@ -112,12 +113,12 @@ const ShortenerPage = () => {
           </PageContent>
         </Col>
         <Col md={{ span: 12 }} xs={{ span: 0 }}>
-          {/* <Lottie
+          <Lottie
             options={defaultOptions}
             height={400}
             width={400}
             style={{ marginTop: '2rem' }}
-          /> */}
+          />
         </Col>
       </Row>
 

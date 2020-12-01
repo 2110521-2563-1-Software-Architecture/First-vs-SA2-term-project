@@ -4,6 +4,7 @@ import { CopyOutlined } from '@ant-design/icons'
 import { getShortenHistory } from 'utils/api'
 import styled from '@emotion/styled'
 import { useEffect, useState } from 'react'
+import { NEXT_PUBLIC_SERVER } from 'utils/config'
 
 const { Search } = Input
 
@@ -52,7 +53,7 @@ const History = () => {
 
   const onSearch = async (val) => {
     console.log(val)
-    setResultURL('localhost:8080/' + val)
+    setResultURL(`${NEXT_PUBLIC_SERVER}/${val}`)
     setHistory(await getShortenHistory(val))
   }
 
